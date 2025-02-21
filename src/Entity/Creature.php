@@ -55,7 +55,7 @@ class Creature
         return $this->name;
     }
 
-    public function setName(string $name): static
+    public function setName(?string $name): static
     {
         $this->name = $name;
 
@@ -94,7 +94,12 @@ class Creature
     public function setBestiary(?Bestiary $bestiary): static
     {
         $this->bestiary = $bestiary;
-
+        $maxLp = rand($bestiary->getMinLifePoint(), $bestiary->getMaxLifePoint());
+        $this->setMaxLifePoint($maxLp);
+        $this->setLifePoint($maxLp);
+        if (is_null($this->getName())) {
+            $this->setName($bestiary->getName());
+        }
         return $this;
     }
 

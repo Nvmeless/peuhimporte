@@ -19,11 +19,11 @@ use Symfony\Component\Validator\Validator\ValidatorInterface;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Component\Serializer\Normalizer\AbstractNormalizer;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-#[Route(path: '/api/creature', name: 'creature')]
+#[Route(path: '/api/creature', name: 'api_creature')]
 
 final class CreatureController extends AbstractController
 {
-    #[Route('/', name: 'app_creature', methods: ["GET"])]
+    #[Route('/', name: '_index', methods: ["GET"])]
     public function index(TagAwareCacheInterface $cache, CreatureRepository $repository, SerializerInterface $serializer): JsonResponse
     {
         $idCache = "getAllCreatures";
@@ -38,7 +38,7 @@ final class CreatureController extends AbstractController
 
         return new JsonResponse($jsonCreatures, JsonResponse::HTTP_OK, [], true);
     }
-    #[Route('/{id}', name: "creature_get", methods: ["GET"])]
+    #[Route('/{id}', name: "_get", methods: ["GET"])]
     #[IsGranted('ROLE_ADMIN')]
     // #[Security("is_granted('ROLE_ADMIN') and is_granted('ROLE_USER')")]
     public function get(Creature $creature, SerializerInterface $serializer): JsonResponse
@@ -74,7 +74,7 @@ final class CreatureController extends AbstractController
     //     $cache->invalidateTags(["getAllCreatures"]);
     //     return new JsonResponse($jsonCreatures, JsonResponse::HTTP_CREATED, ["Location" => $location], true);
     // }
-    #[Route('/new', name: 'creature_generate', methods: ["POST"])]
+    #[Route('/new', name: '_new', methods: ["POST"])]
     public function generate(BestiaryRepository $bestiaryRepository, TagAwareCacheInterface $cache, Request $request, SerializerInterface $serializer, EntityManagerInterface $entityManager, UrlGeneratorInterface $urlGenerator, ValidatorInterface $validator): JsonResponse
     {
 
@@ -85,12 +85,12 @@ final class CreatureController extends AbstractController
         // $creature = new Creature();
 
         $bestiary = $bestiaryRepository->find($content["bestiary"]);
-        $maxLp = rand($bestiary->getMinLifePoint(), $bestiary->getMaxLifePoint());
+        // $maxLp = rand($bestiary->getMinLifePoint(), $bestiary->getMaxLifePoint());
 
 
         $creature->setName($content['name'] ?? $bestiary->getName());
-        $creature->setMaxLifePoint($maxLp);
-        $creature->setLifePoint($maxLp);
+        // $creature->setMaxLifePoint($maxLp);
+        // $creature->setLifePoint($maxLp);
         $creature->setBestiary($bestiary);
 
         $errors = $validator->validate($creature);
@@ -102,12 +102,12 @@ final class CreatureController extends AbstractController
 
         $jsonCreatures = $serializer->serialize($creature, 'json', ['groups' => "creatures"]);
 
-        $location = $urlGenerator->generate("creaturecreature_get", ["id" => $creature->getId()], UrlGeneratorInterface::ABSOLUTE_URL);
+        $location = $urlGenerator->generate("api_creature_get", ["id" => $creature->getId()], UrlGeneratorInterface::ABSOLUTE_URL);
 
         $cache->invalidateTags(["creatureCache"]);
         return new JsonResponse($jsonCreatures, JsonResponse::HTTP_CREATED, ["Location" => $location], true);
     }
-    #[Route('/{id}', name: 'creature_delete', methods: ["DELETE"])]
+    #[Route('/{id}', name: '_delete', methods: ["DELETE"])]
     public function delete(TagAwareCacheInterface $cache, Creature $creature, SerializerInterface $serializer, EntityManagerInterface $entityManager): JsonResponse
     {
         $entityManager->remove($creature);
@@ -120,7 +120,7 @@ final class CreatureController extends AbstractController
         return new JsonResponse(null, JsonResponse::HTTP_NO_CONTENT, [], false);
     }
 
-    #[Route('/{id}', name: 'creature_update', methods: ["PUT", "PATCH"])]
+    #[Route('/{id}', name: '_update', methods: ["PUT", "PATCH"])]
     public function update(TagAwareCacheInterface $cache, Request $request, Creature $creature, SerializerInterface $serializer, EntityManagerInterface $entityManager): JsonResponse
     {
         $creature = $serializer->deserialize(
